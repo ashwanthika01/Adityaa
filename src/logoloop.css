@@ -1,0 +1,63 @@
+.logoloop {
+  position: relative;
+  overflow: hidden;
+  overflow-block: hidden;
+  width: 100%;
+}
+
+.logoloop__track {
+  display: flex;
+  will-change: transform;
+}
+
+.logoloop__list {
+  display: flex;
+  gap: var(--logoloop-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logoloop__item img {
+  height: var(--logoloop-logoHeight);
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logoloop--scale-hover .logoloop__item img:hover {
+  transform: scale(1.1);
+}
+
+.logoloop--fade .logoloop__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  pointer-events: none;
+}
+
+.logoloop__fade--left {
+  left: 0;
+  background: linear-gradient(to right, var(--logoloop-fadeColor, #fff), transparent);
+}
+
+.logoloop__fade--right {
+  right: 0;
+  background: linear-gradient(to left, var(--logoloop-fadeColor, #fff), transparent);
+}
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-modal img {
+  max-height: 90%;
+  max-width: 90%;
+  border-radius: 10px;
+}
