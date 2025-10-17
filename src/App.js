@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "./App.css";
+import myVideo from "./assets/Video.mp4";
 //import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 
@@ -188,8 +189,15 @@ export default function App() {
 
       {/* About Us */}
       <section className="about-section" id="about">
-        <div className="about-image">
-          <img src="/about-image.jpg" alt="About Adityaa Auto Products" />
+        <div className="about-video">
+          <video 
+        src={myVideo} 
+        autoPlay 
+        loop 
+        muted 
+        playsInline 
+        className="w-full h-screen object-cover"
+      />
         </div>
         <div className="about-content">
           <h2>About Us</h2>

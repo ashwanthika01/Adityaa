@@ -26,6 +26,9 @@ body::before{
   opacity: 0.3;
   z-index: -1;
 }
+section {
+  scroll-margin-top: 100px; 
+}
 
 /* NAVBAR */
 .navbar {
@@ -69,6 +72,7 @@ body::before{
   color: #007BFF;
 }
 
+
 /* keep contact button at extreme right with spacing from links */
 .contact-button {
   border: none;
@@ -105,14 +109,58 @@ body::before{
   transform-origin: left;
 }
 
-/* responsive: hide links on small screens (we can add a hamburger later if you want) */
+/* --- Hamburger icon --- */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #001f5b;
+  transition: 0.4s;
+}
+
+/* animate hamburger when active */
+.change1 {
+  transform: rotate(-45deg) translate(-6px, 6px);
+}
+.change2 {
+  opacity: 0;
+}
+.change3 {
+  transform: rotate(45deg) translate(-5px, -5px);
+}
+
+/* --- Responsive --- */
 @media (max-width: 768px) {
   .nav-links {
     display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .hamburger {
+    display: flex;
   }
 
   .logo img {
-    height: 64px; 
+    height: 64px;
   }
 }
 
@@ -272,14 +320,14 @@ body::before{
   min-height: 400px;
 }
 
-.about-image {
+.about-video {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.about-image img {
+.about-video video {
   max-width: 100%;
   height: auto;
   border-radius: 12px;
@@ -968,32 +1016,60 @@ html, body {
 }
 
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
   .logo img {
     height: 60px;
   }
   .slide-content {
-    width: 90%;
+    width: 80%;
     top: 45%;
   }
+  .slide-image-wrapper {
+    height: 100%;
+  }
   .slide-content h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
+    margin-left: 50px;
   }
   .slide-content h4 {
     font-size: 1rem;
+    margin-left: 50px;
   }
   .stats-container {
     grid-template-columns: 1fr;
     gap: 25px;
   }
-  .about-section {
+  /*.about-section {
     padding: 40px 20px;
   }
-  .about-content h2 {
-    font-size: 1.8rem;
-  }
+  .about-video{
+    nav-down: auto;
+  }*/
+  .about-section {
+  display: flex;
+  flex-direction: column-reverse; /* keeps video below text on mobile */
+  align-items: flex-start;        /* aligns items to the left */
+  text-align: left;               /* aligns text inside to the left */
+  padding: 2rem;
+}
+
+.about-content {
+  width: 100%;
+  text-align: left;
+}
+
+.about-content h2 {
+  font-size: 1.5rem;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.about-content p {
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
   .choose-grid {
     grid-template-columns: 1fr;
   }
