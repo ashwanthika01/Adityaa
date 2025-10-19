@@ -1,5 +1,10 @@
 import React, {
-  useCallback, useEffect, useMemo, useRef, useState, memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  memo,
 } from "react";
 import "./logoloop.css";
 
@@ -10,9 +15,11 @@ const ANIMATION_CONFIG = {
 };
 
 const toCssLength = (value) =>
-  typeof value === "number" ? `${value}px` : (value ?? undefined);
+  typeof value === "number" ? `${value}px` : value ?? undefined;
 
-const useResizeObserver = (callback, elements, deps) => {
+// -------------------- Hooks --------------------
+
+const useResizeObserver = (callback, elements = [], deps = []) => {
   useEffect(() => {
     if (!window.ResizeObserver) {
       const onWinResize = () => callback();
@@ -20,29 +27,33 @@ const useResizeObserver = (callback, elements, deps) => {
       callback();
       return () => window.removeEventListener("resize", onWinResize);
     }
+
     const observers = elements.map((ref) => {
       if (!ref.current) return null;
       const ro = new ResizeObserver(callback);
       ro.observe(ref.current);
       return ro;
     });
+
     callback();
     return () => observers.forEach((o) => o?.disconnect());
-  }, deps);
+  }, [callback, ...deps, ...elements.map((ref) => ref.current)]);
 };
 
-const useImageLoader = (seqRef, onLoad, deps) => {
+const useImageLoader = (seqRef, onLoad, deps = []) => {
   useEffect(() => {
     const images = seqRef.current?.querySelectorAll("img") ?? [];
     if (images.length === 0) {
       onLoad();
       return;
     }
+
     let remaining = images.length;
     const done = () => {
       remaining -= 1;
       if (remaining === 0) onLoad();
     };
+
     images.forEach((img) => {
       if (img.complete) done();
       else {
@@ -50,34 +61,23 @@ const useImageLoader = (seqRef, onLoad, deps) => {
         img.addEventListener("error", done, { once: true });
       }
     });
-    return () => {
-      images.forEach((img) => {
-        img.removeEventListener("load", done);
-        img.removeEventListener("error", done);
-      });
-    };
-  }, deps);
+
+    return () => {};
+  }, [onLoad, ...deps, seqRef.current]);
 };
 
-const useAnimationLoop = (
-  trackRef, targetVelocity, seqWidth, isHovered, pauseOnHover
-) => {
+const useAnimationLoop = (trackRef, targetVelocity, seqWidth, isHovered, pauseOnHover) => {
   const rafRef = useRef(null);
   const lastTsRef = useRef(null);
   const offsetRef = useRef(0);
   const velocityRef = useRef(0);
 
-  useEffect(() => {
+  const animateLoop = useCallback(() => {
     const track = trackRef.current;
-    if (!track) return;
-
-    if (seqWidth > 0) {
-      offsetRef.current = ((offsetRef.current % seqWidth) + seqWidth) % seqWidth;
-      track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
-    }
+    if (!track || seqWidth <= 0) return;
 
     const animate = (ts) => {
-      if (lastTsRef.current === null) lastTsRef.current = ts;
+      if (!lastTsRef.current) lastTsRef.current = ts;
       const dt = Math.max(0, ts - lastTsRef.current) / 1000;
       lastTsRef.current = ts;
 
@@ -85,24 +85,30 @@ const useAnimationLoop = (
       const k = 1 - Math.exp(-dt / ANIMATION_CONFIG.SMOOTH_TAU);
       velocityRef.current += (target - velocityRef.current) * k;
 
-      if (seqWidth > 0) {
-        let nextOffset = offsetRef.current + velocityRef.current * dt;
-        nextOffset = ((nextOffset % seqWidth) + seqWidth) % seqWidth;
-        offsetRef.current = nextOffset;
-        track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
-      }
+      offsetRef.current = (offsetRef.current + velocityRef.current * dt) % seqWidth;
+      if (offsetRef.current < 0) offsetRef.current += seqWidth;
+
+      track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
 
       rafRef.current = requestAnimationFrame(animate);
     };
 
     rafRef.current = requestAnimationFrame(animate);
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
       lastTsRef.current = null;
     };
-  }, [targetVelocity, seqWidth, isHovered, pauseOnHover, trackRef]);
+  }, [trackRef, targetVelocity, seqWidth, isHovered, pauseOnHover]);
+
+  useEffect(() => {
+    const cleanup = animateLoop();
+    return cleanup;
+  }, [animateLoop]);
 };
+
+// -------------------- Component --------------------
 
 const LogoLoop = memo(function LogoLoop({
   logos,
@@ -148,8 +154,22 @@ const LogoLoop = memo(function LogoLoop({
     }
   }, []);
 
-  useResizeObserver(updateDimensions, [containerRef, seqRef], [logos, gap, logoHeight]);
-  useImageLoader(seqRef, updateDimensions, [logos, gap, logoHeight]);
+  useResizeObserver(updateDimensions, [containerRef, seqRef], [
+    updateDimensions,
+    logos,
+    gap,
+    logoHeight,
+    containerRef.current,
+    seqRef.current,
+  ]);
+  useImageLoader(seqRef, updateDimensions, [
+    updateDimensions,
+    logos,
+    gap,
+    logoHeight,
+    seqRef.current,
+  ]);
+
   useAnimationLoop(trackRef, targetVelocity, seqWidth, isHovered, pauseOnHover);
 
   const cssVars = useMemo(
@@ -180,18 +200,21 @@ const LogoLoop = memo(function LogoLoop({
     if (pauseOnHover) setIsHovered(false);
   }, [pauseOnHover]);
 
-  const renderItem = useCallback((item, key) => (
-    <li className="logoloop__item" key={key}>
-      <img
-        src={item.src}
-        alt={item.alt ?? ""}
-        loading="lazy"
-        decoding="async"
-        draggable={false}
-        onClick={() => openModal(item)}
-      />
-    </li>
-  ), [openModal]);
+  const renderItem = useCallback(
+    (item, key) => (
+      <li className="logoloop__item" key={key}>
+        <img
+          src={item.src}
+          alt={item.alt ?? ""}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onClick={() => openModal(item)}
+        />
+      </li>
+    ),
+    [openModal]
+  );
 
   const lists = useMemo(
     () =>
