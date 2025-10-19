@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ScrollReveal from "scrollreveal";
 import logo from "./logo.png";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,11 +9,11 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "./App.css";
 import myVideo from "./assets/Video.mp4";
-//import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 
-
 export default function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showContact, setShowContact] = useState(false); // State for modal visibility
 
   const images = [
     { src: "/images/im1.jpeg", alt: "Pipe bending machine" },
@@ -25,9 +25,10 @@ export default function App() {
     { src: "/images/im7.jpeg", alt: "Pipe bending machine" },
   ];
 
+  // Scroll reveal animation
   useEffect(() => {
     ScrollReveal().reveal(
-      ".stat-item, .about-section, .mission-section, .why-choose, .services-section,.proprietor-section, .address-section",
+      ".stat-item, .about-section, .mission-section, .why-choose, .services-section, .proprietor-section, .address-section",
       {
         duration: 1000,
         distance: "50px",
@@ -39,6 +40,7 @@ export default function App() {
     );
   }, []);
 
+  // Spotlight card hover effect
   const SpotlightCard = ({
     children,
     className = "",
@@ -65,15 +67,8 @@ export default function App() {
       </div>
     );
   };
-/*
-  const [sliderRef] = useKeenSlider({
-    loop: true,
-    mode: "free-snap",
-    renderMode: "performance",
-    slides: { perView: 1.2, spacing: 30 },
-    centered: true,
-  });*/
 
+  // Background particle effect
   useEffect(() => {
     const canvas = document.getElementById("particles");
     if (!canvas) return;
@@ -111,8 +106,6 @@ export default function App() {
     animate();
   }, []);
 
-
-
   return (
     <div>
       {/* Navbar */}
@@ -120,13 +113,37 @@ export default function App() {
         <div className="logo">
           <img src={logo} alt="Adityaa Auto Products" />
         </div>
-        <div className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#about">About Us</a>
-          <a href="#mission">Mission</a>
-          <a href="#services">Services</a>
+
+        {/* Hamburger Button */}
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+
+        <div className={`nav-links ${menuOpen ? "active" : ""}`}>
+          <a href="#home" onClick={() => setMenuOpen(false)}>
+            Home
+          </a>
+          <a href="#about" onClick={() => setMenuOpen(false)}>
+            About Us
+          </a>
+          <a href="#mission" onClick={() => setMenuOpen(false)}>
+            Mission
+          </a>
+          <a href="#services" onClick={() => setMenuOpen(false)}>
+            Services
+          </a>
+          <a
+            href="tel:+919876543210"
+            className="contact-button"
+            onClick={() => setMenuOpen(false)}
+          >
+            📞 Contact Us
+          </a>
         </div>
-        <a href="tel:+919876543210" className="contact-button"> 📞 Contact Us </a>
       </nav>
 
       {/* Hero Slideshow */}
@@ -146,9 +163,13 @@ export default function App() {
             </div>
             <div className="slide-content">
               <h1>Precision Pipe Bending Solutions</h1>
-              <h4>
-                Serving Automotive & Manufacturing Industries with Excellence
-              </h4>
+              <h4>Serving Automotive & Manufacturing Industries with Excellence</h4>
+              <button
+                className="enquire-btn"
+                onClick={() => setShowContact(true)}
+              >
+                Enquire Now
+              </button>
             </div>
           </SwiperSlide>
 
@@ -159,13 +180,50 @@ export default function App() {
             </div>
             <div className="slide-content">
               <h1>Precision Pipe Bending Solutions</h1>
-              <h4>
-                Serving Automotive & Manufacturing Industries with Excellence
-              </h4>
+              <h4>Serving Automotive & Manufacturing Industries with Excellence</h4>
+              <button
+                className="enquire-btn"
+                onClick={() => setShowContact(true)}
+              >
+                Enquire Now
+              </button>
             </div>
           </SwiperSlide>
         </Swiper>
       </div>
+
+      {/* Contact Modal - Single instance */}
+      {showContact && (
+        <div className="modal-overlay" onClick={() => setShowContact(false)}>
+          <form
+            className="contact-modal"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target;
+              const res = await fetch("http://localhost:5000/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: form.name.value,
+                  contact: form.contact.value,
+                  message: form.message.value,
+                }),
+              });
+              const data = await res.json();
+              alert(data.message);
+              setShowContact(false);
+            }}
+          >
+            <h2>Enquire Now</h2>
+            <input name="name" required placeholder="Your Name" />
+            <input name="contact" required placeholder="Phone or Email" />
+            <textarea name="message" required placeholder="Type your message..." />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      )}
+  
 
       {/* Stats Section */}
       <div className="stats-container">

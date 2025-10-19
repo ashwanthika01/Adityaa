@@ -38,25 +38,35 @@ section {
   right: 0;
   background-color: white;
   display: flex;
-  align-items: center;       
+  align-items: center;
   padding: 15px 40px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  z-index: 999;
+  z-index: 10000; /* stays above everything */
   font-family: sans-serif;
+  overflow: visible !important; /* ensures dropdown can expand */
+}
+.menu-toggle {
+  display: none;
+}
+
+/* Ensure logo stays left */
+.logo {
+  display: flex;
+  align-items: center;
 }
 
 .logo img {
-  height: 80px; 
+  height: 80px;
   width: auto;
   display: block;
 }
 
-/* push links (and contact button after them) to the right */
+/* push nav links (and contact button) to the right */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 28px;
-  margin-left: auto;          
+  margin-left: auto;
 }
 
 /* link styles */
@@ -72,8 +82,7 @@ section {
   color: #007BFF;
 }
 
-
-/* keep contact button at extreme right with spacing from links */
+/* contact button */
 .contact-button {
   border: none;
   cursor: pointer;
@@ -83,14 +92,14 @@ section {
   background-color: #1E4F8C;
   position: relative;
   overflow: hidden;
-  color: white;
+  color: whitesmoke;
   text-decoration: none;
   transition: color 0.3s ease;
-  margin-left: 20px;           
+  margin-left: 20px;
   border-radius: 4px;
 }
 
-/* small underline animation on hover */
+/* underline animation */
 .contact-button::after {
   content: '';
   position: absolute;
@@ -109,60 +118,61 @@ section {
   transform-origin: left;
 }
 
-/* --- Hamburger icon --- */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-  gap: 5px;
-}
 
-.bar {
-  width: 25px;
-  height: 3px;
-  background-color: #001f5b;
-  transition: 0.4s;
-}
-
-/* animate hamburger when active */
-.change1 {
-  transform: rotate(-45deg) translate(-6px, 6px);
-}
-.change2 {
-  opacity: 0;
-}
-.change3 {
-  transform: rotate(45deg) translate(-5px, -5px);
-}
-
-/* --- Responsive --- */
 @media (max-width: 768px) {
   .nav-links {
     display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
     flex-direction: column;
     width: 100%;
+    background-color: white;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    text-align: left;
+    padding: 10px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 10000;
+  }
+.menu-toggle {
+  margin-left: auto;
+  display: block;
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 10001; /* ensure it stays above overlays */
+}
+  .nav-links.active {
+    display: flex;
+    animation: slideDown 0.3s ease forwards;
+  }
+
+  .nav-links a {
+    padding: 12px 0;
+    width: 100%;
+  }
+
+  /* Ensure contact button inside nav-links fills width and centers text */
+  .nav-links .contact-button {
+    width: 100%;
     text-align: center;
-    gap: 1.5rem;
-    padding: 1rem 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-
-  .logo img {
-    height: 64px;
+    margin: 12px 0;
   }
 }
+
+/* dropdown animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 .slideshow-container {
   position: relative;
@@ -208,6 +218,25 @@ section {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+.enquire-btn {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(30, 64, 175, 0.26);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.enquire-btn:hover {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  transform: scale(1.06);
 }
 
 .slide-shine {
@@ -1022,9 +1051,11 @@ html, body {
   .slide-content {
     width: 80%;
     top: 45%;
+  
   }
   .slide-image-wrapper {
     height: 100%;
+    z-index: -1;
   }
   .slide-content h1 {
     font-size: 2rem;
@@ -1038,12 +1069,7 @@ html, body {
     grid-template-columns: 1fr;
     gap: 25px;
   }
-  /*.about-section {
-    padding: 40px 20px;
-  }
-  .about-video{
-    nav-down: auto;
-  }*/
+ 
   .about-section {
   display: flex;
   flex-direction: column-reverse; /* keeps video below text on mobile */
